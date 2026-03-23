@@ -1,0 +1,158 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Inter:opsz,wght@14..32,100..900&family=Manrope:wght@200..800&family=Space+Grotesk:wght@300..700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --font-heading: 'Space Grotesk', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+
+    --background: 40 33% 97%;
+    --foreground: 220 20% 14%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 220 20% 14%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 20% 14%;
+
+    --primary: 162 63% 41%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 40 30% 93%;
+    --secondary-foreground: 220 20% 20%;
+
+    --muted: 40 20% 94%;
+    --muted-foreground: 220 10% 50%;
+
+    --accent: 262 60% 58%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 72% 58%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 152 60% 42%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 38 92% 58%;
+    --warning-foreground: 220 20% 14%;
+
+    --border: 220 13% 90%;
+    --input: 220 13% 90%;
+    --ring: 162 63% 41%;
+
+    --radius: 1rem;
+
+    --glass-bg: 0 0% 100% / 0.6;
+    --glass-border: 0 0% 100% / 0.3;
+    --glass-blur: 16px;
+
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 220 20% 14%;
+    --sidebar-primary: 162 63% 41%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 40 30% 95%;
+    --sidebar-accent-foreground: 220 20% 20%;
+    --sidebar-border: 220 13% 92%;
+    --sidebar-ring: 162 63% 41%;
+  }
+
+  html[lang="ru"],
+  html[lang="kk"] {
+    --font-heading: 'Manrope', sans-serif;
+    --font-body: 'Inter', sans-serif;
+  }
+
+  .dark {
+    --background: 224 20% 8%;
+    --foreground: 210 20% 92%;
+
+    --card: 224 18% 12%;
+    --card-foreground: 210 20% 92%;
+
+    --popover: 224 18% 12%;
+    --popover-foreground: 210 20% 92%;
+
+    --primary: 162 63% 45%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 224 16% 16%;
+    --secondary-foreground: 210 20% 85%;
+
+    --muted: 224 14% 18%;
+    --muted-foreground: 220 10% 55%;
+
+    --accent: 262 60% 62%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 72% 52%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 152 60% 45%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 38 92% 55%;
+    --warning-foreground: 220 20% 14%;
+
+    --border: 224 14% 20%;
+    --input: 224 14% 20%;
+    --ring: 162 63% 45%;
+
+    --glass-bg: 224 18% 12% / 0.7;
+    --glass-border: 224 14% 25% / 0.4;
+    --glass-blur: 16px;
+
+    --sidebar-background: 224 18% 10%;
+    --sidebar-foreground: 210 20% 92%;
+    --sidebar-primary: 162 63% 45%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 224 16% 16%;
+    --sidebar-accent-foreground: 210 20% 85%;
+    --sidebar-border: 224 14% 18%;
+    --sidebar-ring: 162 63% 45%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: var(--font-body);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+  }
+}
+
+@layer components {
+  .glass {
+    background: hsl(var(--glass-bg));
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid hsl(var(--glass-border));
+  }
+
+  .glass-card {
+    @apply glass rounded-2xl;
+  }
+}
+
+@layer utilities {
+  .gradient-primary {
+    background: linear-gradient(135deg, hsl(162 63% 41%), hsl(162 80% 55%));
+  }
+
+  .gradient-accent {
+    background: linear-gradient(135deg, hsl(262 60% 58%), hsl(290 60% 65%));
+  }
+
+  .gradient-warm {
+    background: linear-gradient(135deg, hsl(38 92% 58%), hsl(20 90% 55%));
+  }
+}
