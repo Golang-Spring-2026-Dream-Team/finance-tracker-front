@@ -1,14 +1,21 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Wallet, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { t } from '@/shared/lib/i18n';
+import { useMutation } from '@tanstack/react-query';
+import { authApi } from '@/features/auth/api/auth-api';
+import { useAuthStore } from '@/features/auth/model/auth-store';
+import { ApiError } from '@/shared/api/http';
 
 const Login = () => {
+  const navigate = useNavigate();
+  const setSession = useAuthStore((state) => state.setSession);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [serverError, setServerError] = useState('');
 
   const validate = () => {
     const errs: Record<string, string> = {};
@@ -20,10 +27,29 @@ const Login = () => {
     return Object.keys(errs).length === 0;
   };
 
+  const loginMutation = useMutation({
+    mutationFn: authApi.login,
+    onSuccess: (tokens) => {
+      setSession({
+        accessToken: tokens.access_token,
+        refreshToken: tokens.refresh_token,
+      });
+      navigate('/');
+    },
+    onError: (err) => {
+      if (err instanceof ApiError) {
+        setServerError(err.message);
+        return;
+      }
+      setServerError('Login failed. Please try again.');
+    },
+  });
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (validate()) {
-      // Handle login
+      setServerError('');
+      loginMutation.mutate({ email, password });
     }
   };
 
@@ -103,8 +129,9 @@ const Login = () => {
             </div>
 
             <button type="submit" className="w-full py-2.5 rounded-xl gradient-primary text-primary-foreground font-semibold text-sm hover:opacity-90 transition-opacity">
-              {t('auth.login')}
+              {loginMutation.isPending ? 'Signing in...' : t('auth.login')}
             </button>
+            {serverError && <p className="text-xs text-destructive">{serverError}</p>}
           </form>
 
           <p className="text-center text-sm text-muted-foreground">

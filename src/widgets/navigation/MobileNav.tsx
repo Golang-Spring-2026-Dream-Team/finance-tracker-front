@@ -1,10 +1,12 @@
 import { NavLink, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Wallet, ArrowLeftRight, Upload, Settings, Sun, Moon, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Wallet, ArrowLeftRight, Upload, Settings, Sun, Moon, Menu, X, LogOut } from 'lucide-react';
 import { useTheme } from '@/features/theme/model/theme-store';
 import { t } from '@/shared/lib/i18n';
 import { LanguageSelector } from '@/features/i18n/ui/LanguageSelector';
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
+import { useAuthStore } from '@/features/auth/model/auth-store';
+import { authApi } from '@/features/auth/api/auth-api';
 
 const navItems = [
   { to: '/', icon: LayoutDashboard, label: 'nav.dashboard' },
@@ -16,8 +18,24 @@ const navItems = [
 
 export const MobileNav = () => {
   const { theme, toggle } = useTheme();
+  const clearSession = useAuthStore((state) => state.clearSession);
+  const refreshToken = useAuthStore((state) => state.refreshToken);
   const [open, setOpen] = useState(false);
   const location = useLocation();
+
+  const handleLogout = async () => {
+    if (!refreshToken) {
+      clearSession();
+      return;
+    }
+    try {
+      await authApi.logout(refreshToken);
+    } catch {
+      // best-effort logout; clear local session anyway
+    } finally {
+      clearSession();
+    }
+  };
 
   return (
     <div className="md:hidden">
@@ -65,6 +83,13 @@ export const MobileNav = () => {
             </nav>
             <div className="px-4 pb-4">
               <LanguageSelector />
+              <button
+                onClick={handleLogout}
+                className="mt-2 flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm font-medium text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
+              >
+                <LogOut className="w-5 h-5" />
+                <span>Logout</span>
+              </button>
             </div>
           </motion.div>
         )}

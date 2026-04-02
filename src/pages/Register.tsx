@@ -1,16 +1,24 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Wallet, Mail, Lock, Eye, EyeOff, User } from 'lucide-react';
 import { t } from '@/shared/lib/i18n';
+import { useMutation } from '@tanstack/react-query';
+import { authApi } from '@/features/auth/api/auth-api';
+import { useAuthStore } from '@/features/auth/model/auth-store';
+import { ApiError } from '@/shared/api/http';
 
 const Register = () => {
+  const navigate = useNavigate();
+  const setSession = useAuthStore((state) => state.setSession);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [currency, setCurrency] = useState('USD');
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [serverError, setServerError] = useState('');
 
   const validate = () => {
     const errs: Record<string, string> = {};
@@ -24,10 +32,34 @@ const Register = () => {
     return Object.keys(errs).length === 0;
   };
 
+  const registerMutation = useMutation({
+    mutationFn: authApi.register,
+    onSuccess: (tokens) => {
+      setSession({
+        accessToken: tokens.access_token,
+        refreshToken: tokens.refresh_token,
+      });
+      navigate('/');
+    },
+    onError: (err) => {
+      if (err instanceof ApiError) {
+        setServerError(err.message);
+        return;
+      }
+      setServerError('Registration failed. Please try again.');
+    },
+  });
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (validate()) {
-      // Handle register
+      setServerError('');
+      registerMutation.mutate({
+        name,
+        email,
+        password,
+        currency,
+      });
     }
   };
 
@@ -104,9 +136,26 @@ const Register = () => {
               {errors.confirmPassword && <p className="text-xs text-destructive mt-1">{errors.confirmPassword}</p>}
             </div>
 
+            <div>
+              <label className="text-sm font-medium text-foreground mb-1.5 block">Currency</label>
+              <select
+                value={currency}
+                onChange={e => setCurrency(e.target.value)}
+                className={inputClass('')}
+              >
+                <option value="USD">USD</option>
+                <option value="EUR">EUR</option>
+                <option value="GBP">GBP</option>
+                <option value="KZT">KZT</option>
+                <option value="JPY">JPY</option>
+                <option value="RUB">RUB</option>
+              </select>
+            </div>
+
             <button type="submit" className="w-full py-2.5 rounded-xl gradient-primary text-primary-foreground font-semibold text-sm hover:opacity-90 transition-opacity">
-              {t('auth.register')}
+              {registerMutation.isPending ? 'Creating account...' : t('auth.register')}
             </button>
+            {serverError && <p className="text-xs text-destructive">{serverError}</p>}
           </form>
 
           <p className="text-center text-sm text-muted-foreground">

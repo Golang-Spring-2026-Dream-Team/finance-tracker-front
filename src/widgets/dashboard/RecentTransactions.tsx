@@ -2,21 +2,23 @@ import { useCurrency } from '@/features/currency/model/currency-store';
 import { motion } from 'framer-motion';
 import { ArrowUpRight, ArrowDownRight } from 'lucide-react';
 
-const transactions = [
-  { id: 1, name: 'Grocery Store', category: 'Food', amount: -85.50, date: '2024-03-20' },
-  { id: 2, name: 'Salary Deposit', category: 'Income', amount: 4800, date: '2024-03-19' },
-  { id: 3, name: 'Netflix', category: 'Entertainment', amount: -15.99, date: '2024-03-18' },
-  { id: 4, name: 'Gas Station', category: 'Transport', amount: -52.00, date: '2024-03-17' },
-  { id: 5, name: 'Freelance Work', category: 'Income', amount: 650, date: '2024-03-16' },
-];
+interface RecentTransaction {
+  id: number;
+  name: string;
+  category: string;
+  amount: number;
+}
 
-export const RecentTransactions = () => {
+export const RecentTransactions = ({ transactions }: { transactions: RecentTransaction[] }) => {
   const { format } = useCurrency();
 
   return (
     <div className="glass-card p-5">
       <h3 className="font-heading font-semibold text-foreground mb-4">Recent Transactions</h3>
       <div className="space-y-3">
+        {transactions.length === 0 && (
+          <p className="text-sm text-muted-foreground">No recent transactions yet</p>
+        )}
         {transactions.map((tx, i) => (
           <motion.div
             key={tx.id}
