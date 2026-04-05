@@ -3,6 +3,7 @@ import { ApiErrorEnvelope, AuthTokens } from "@/shared/api/types";
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || "").replace(/\/$/, "");
 const API_PREFIX = "/api/v1";
+const CSRF_COOKIE_NAME = "csrf_token";
 
 export class ApiError extends Error {
   status: number;
@@ -16,6 +17,20 @@ export class ApiError extends Error {
 }
 
 const buildUrl = (path: string): string => `${API_BASE_URL}${API_PREFIX}${path}`;
+
+const readCookie = (name: string): string | null => {
+  if (typeof document === "undefined") {
+    return null;
+  }
+  const escaped = name.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+  const match = document.cookie.match(new RegExp(`(?:^|; )${escaped}=([^;]*)`));
+  return match ? decodeURIComponent(match[1]) : null;
+};
+
+const csrfHeader = (): Record<string, string> => {
+  const token = readCookie(CSRF_COOKIE_NAME);
+  return token ? { "X-CSRF-Token": token } : {};
+};
 
 async function parseError(res: Response): Promise<ApiError> {
   let payload: ApiErrorEnvelope | null = null;
@@ -32,10 +47,6 @@ async function parseError(res: Response): Promise<ApiError> {
 let refreshPromise: Promise<string | null> | null = null;
 
 async function refreshAccessToken(): Promise<string | null> {
-  const state = useAuthStore.getState();
-  if (!state.refreshToken) {
-    return null;
-  }
   if (refreshPromise) {
     return refreshPromise;
   }
@@ -44,8 +55,8 @@ async function refreshAccessToken(): Promise<string | null> {
     try {
       const res = await fetch(buildUrl("/auth/refresh"), {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ refresh_token: state.refreshToken }),
+        credentials: "include",
+        headers: csrfHeader(),
       });
 
       if (!res.ok) {
@@ -56,7 +67,6 @@ async function refreshAccessToken(): Promise<string | null> {
       const tokens = (await res.json()) as AuthTokens;
       useAuthStore.getState().setSession({
         accessToken: tokens.access_token,
-        refreshToken: tokens.refresh_token,
       });
 
       return tokens.access_token;
@@ -79,13 +89,17 @@ interface RequestOptions extends RequestInit {
 export async function requestJson<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const { auth = false, retryUnauthorized = true, headers, ...rest } = options;
   const state = useAuthStore.getState();
+  const method = (rest.method || "GET").toUpperCase();
+  const csrfHeaders = method === "POST" || method === "PATCH" || method === "PUT" || method === "DELETE" ? csrfHeader() : {};
   const authHeaders =
     auth && state.accessToken ? { Authorization: `Bearer ${state.accessToken}` } : {};
 
   const res = await fetch(buildUrl(path), {
     ...rest,
+    credentials: "include",
     headers: {
       "Content-Type": "application/json",
+      ...csrfHeaders,
       ...authHeaders,
       ...headers,
     },

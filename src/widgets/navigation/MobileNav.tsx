@@ -19,17 +19,12 @@ const navItems = [
 export const MobileNav = () => {
   const { theme, toggle } = useTheme();
   const clearSession = useAuthStore((state) => state.clearSession);
-  const refreshToken = useAuthStore((state) => state.refreshToken);
   const [open, setOpen] = useState(false);
   const location = useLocation();
 
   const handleLogout = async () => {
-    if (!refreshToken) {
-      clearSession();
-      return;
-    }
     try {
-      await authApi.logout(refreshToken);
+      await authApi.logout();
     } catch {
       // best-effort logout; clear local session anyway
     } finally {

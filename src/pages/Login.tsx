@@ -32,7 +32,6 @@ const Login = () => {
     onSuccess: (tokens) => {
       setSession({
         accessToken: tokens.access_token,
-        refreshToken: tokens.refresh_token,
       });
       navigate('/');
     },

@@ -28,10 +28,9 @@ export const authApi = {
     requestJson<User>("/users/me", {
       auth: true,
     }),
-  logout: (refreshToken: string) =>
+  logout: () =>
     requestJson<void>("/auth/logout", {
       method: "POST",
       auth: true,
-      body: JSON.stringify({ refresh_token: refreshToken }),
     }),
 };
