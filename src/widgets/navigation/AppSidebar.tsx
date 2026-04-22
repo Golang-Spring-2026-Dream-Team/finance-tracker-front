@@ -10,7 +10,7 @@ import { authApi } from '@/features/auth/api/auth-api';
 
 const navItems = [
   { to: '/', icon: LayoutDashboard, label: 'nav.dashboard' },
-  { to: '/budgets', icon: Wallet, label: 'nav.budgets' },
+  { to: '/wallets', icon: Wallet, label: 'nav.wallets' },
   { to: '/transactions', icon: ArrowLeftRight, label: 'nav.transactions' },
   { to: '/import', icon: Upload, label: 'nav.import' },
   { to: '/settings', icon: Settings, label: 'nav.settings' },

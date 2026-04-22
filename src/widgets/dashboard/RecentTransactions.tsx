@@ -7,10 +7,11 @@ interface RecentTransaction {
   name: string;
   category: string;
   amount: number;
+  currency: string;
 }
 
 export const RecentTransactions = ({ transactions }: { transactions: RecentTransaction[] }) => {
-  const { format } = useCurrency();
+  const { formatConverted } = useCurrency();
 
   return (
     <div className="glass-card p-5">
@@ -43,7 +44,7 @@ export const RecentTransactions = ({ transactions }: { transactions: RecentTrans
               </div>
             </div>
             <span className={`text-sm font-semibold ${tx.amount > 0 ? 'text-success' : 'text-foreground'}`}>
-              {tx.amount > 0 ? '+' : ''}{format(tx.amount)}
+              {tx.amount > 0 ? '+' : ''}{formatConverted(tx.amount, tx.currency)}
             </span>
           </motion.div>
         ))}

@@ -25,13 +25,14 @@ interface UiTransaction {
   name: string;
   category: string;
   amount: number;
+  currency: string;
   date: string;
   accountId: number;
 }
 
 const categories = ["Food", "Income", "Entertainment", "Transport", "Utilities", "Health", "Shopping", "Other"];
 
-const toUiTransaction = (tx: { id: number; description: string; amount: string; type: string; transacted_at: string; account_id: number }): UiTransaction => {
+const toUiTransaction = (tx: { id: number; description: string; amount: string; currency: string; type: string; transacted_at: string; account_id: number }): UiTransaction => {
   const raw = Number(tx.amount);
   const normalized = Number.isFinite(raw) ? raw : 0;
   const signedAmount = tx.type === "expense" ? -Math.abs(normalized) : Math.abs(normalized);
@@ -40,6 +41,7 @@ const toUiTransaction = (tx: { id: number; description: string; amount: string; 
     id: tx.id,
     name: tx.description,
     category: tx.type === "income" ? "Income" : "Expense",
+    currency: tx.currency,
     amount: signedAmount,
     date: tx.transacted_at,
     accountId: tx.account_id,
@@ -47,7 +49,7 @@ const toUiTransaction = (tx: { id: number; description: string; amount: string; 
 };
 
 const Transactions = () => {
-  const { format, currency } = useCurrency();
+  const { format, formatConverted, convert, currency } = useCurrency();
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [filterCategory, setFilterCategory] = useState("");
@@ -105,7 +107,7 @@ const Transactions = () => {
           name: "Main Account",
           account_type: "cash",
           currency: currency.code,
-          balance: "0",
+          balance: "",
         });
         accountId = createdAccount.id;
         await queryClient.invalidateQueries({ queryKey: ["accounts"] });
@@ -146,8 +148,8 @@ const Transactions = () => {
     createMutation.mutate();
   };
 
-  const totalIncome = filtered.filter((tx) => tx.amount > 0).reduce((s, tx) => s + tx.amount, 0);
-  const totalExpenses = filtered.filter((tx) => tx.amount < 0).reduce((s, tx) => s + tx.amount, 0);
+  const totalIncome = filtered.filter((tx) => tx.amount > 0).reduce((s, tx) => s + convert(tx.amount, tx.currency), 0);
+  const totalExpenses = filtered.filter((tx) => tx.amount < 0).reduce((s, tx) => s + convert(tx.amount, tx.currency), 0);
 
   const inputClass = (field: string) =>
     `w-full rounded-xl bg-secondary text-foreground px-3 py-2.5 text-sm border outline-none focus:ring-2 focus:ring-ring transition-all ${
@@ -255,7 +257,7 @@ const Transactions = () => {
                   </div>
                 </div>
                 <span className={`text-sm font-semibold flex-shrink-0 ml-4 ${tx.amount > 0 ? "text-success" : "text-foreground"}`}>
-                  {tx.amount > 0 ? "+" : ""}{format(tx.amount)}
+                  {tx.amount > 0 ? "+" : ""}{formatConverted(Math.abs(tx.amount), tx.currency)}
                 </span>
               </motion.div>
             ))

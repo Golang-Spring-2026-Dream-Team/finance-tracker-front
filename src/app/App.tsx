@@ -8,11 +8,13 @@ import { useLocaleStore } from "@/shared/lib/i18n";
 import { authApi } from "@/features/auth/api/auth-api";
 import { useAuthStore } from "@/features/auth/model/auth-store";
 import { useCurrency, type CurrencyCode } from "@/features/currency/model/currency-store";
+import { fetchRates } from "@/features/currency/api/exchange-rates-api";
 import Index from "@/pages/Index";
 import Login from "@/pages/Login";
 import Register from "@/pages/Register";
 import ImportPage from "@/pages/Import";
 import Transactions from "@/pages/Transactions";
+import Wallets from "@/pages/Wallets";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -38,6 +40,11 @@ const AppRoutes = () => {
   const setUser = useAuthStore((state) => state.setUser);
   const clearSession = useAuthStore((state) => state.clearSession);
   const setCurrency = useCurrency((state) => state.setCurrency);
+  const setRates = useCurrency((state) => state.setRates);
+
+  React.useEffect(() => {
+    fetchRates().then((r) => setRates(r.rates));
+  }, [setRates]);
 
   const meQuery = useQuery({
     queryKey: ["auth", "me", accessToken],
@@ -75,7 +82,7 @@ const AppRoutes = () => {
       <Route element={<ProtectedRoute />}>
         <Route path="/" element={<Index />} />
         <Route path="/import" element={<ImportPage />} />
-        <Route path="/budgets" element={<Index />} />
+        <Route path="/wallets" element={<Wallets />} />
         <Route path="/transactions" element={<Transactions />} />
         <Route path="/settings" element={<Index />} />
       </Route>
