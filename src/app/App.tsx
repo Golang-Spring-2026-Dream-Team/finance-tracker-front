@@ -1,9 +1,7 @@
 import React from "react";
 import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { BrowserRouter, Navigate, Outlet, Route, Routes } from "react-router-dom";
-import { Toaster as Sonner } from "@/shared/ui/sonner";
-import { Toaster } from "@/shared/ui/toaster";
-import { TooltipProvider } from "@/shared/ui/tooltip";
+import { MuiProvider } from "@/providers/MuiProvider";
 import { useLocaleStore } from "@/shared/lib/i18n";
 import { authApi } from "@/features/auth/api/auth-api";
 import { useAuthStore } from "@/features/auth/model/auth-store";
@@ -97,13 +95,11 @@ const App = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
+      <MuiProvider>
         <BrowserRouter>
           <AppRoutes />
         </BrowserRouter>
-      </TooltipProvider>
+      </MuiProvider>
     </QueryClientProvider>
   );
 };

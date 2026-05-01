@@ -1,5 +1,5 @@
 import { t, type Locale, useLocaleStore } from "@/shared/lib/i18n";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/select";
+import { FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 
 const languages: Array<{ code: Locale; label: string }> = [
   { code: "ru", label: "language.ru" },
@@ -12,20 +12,20 @@ export const LanguageSelector = () => {
   const setLocale = useLocaleStore((state) => state.setLocale);
 
   return (
-    <div className="px-3 py-2">
-      <label className="text-xs font-medium text-muted-foreground mb-1.5 block">{t("language.label")}</label>
-      <Select value={locale} onValueChange={(value) => setLocale(value as Locale)}>
-        <SelectTrigger className="h-9 rounded-xl bg-secondary text-secondary-foreground border-0 focus:ring-2 focus:ring-ring">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          {languages.map((lang) => (
-            <SelectItem key={lang.code} value={lang.code}>
-              {t(lang.label)}
-            </SelectItem>
-          ))}
-        </SelectContent>
+    <FormControl size="small" fullWidth>
+      <InputLabel sx={{ fontSize: '0.75rem' }}>{t("language.label")}</InputLabel>
+      <Select
+        value={locale}
+        label={t("language.label")}
+        onChange={(e) => setLocale(e.target.value as Locale)}
+        sx={{ borderRadius: '12px' }}
+      >
+        {languages.map((lang) => (
+          <MenuItem key={lang.code} value={lang.code}>
+            {t(lang.label)}
+          </MenuItem>
+        ))}
       </Select>
-    </div>
+    </FormControl>
   );
 };
